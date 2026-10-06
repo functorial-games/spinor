@@ -1,0 +1,47 @@
+name: Spinor native acceptance
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  host-semantic:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Host semantic acceptance
+        run: sh native/test-host.sh
+
+  android-native:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        abi:
+          - armeabi-v7a
+          - arm64-v8a
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: android-actions/setup-android@v3
+
+      - name: Install pinned NDK
+        run: sdkmanager "ndk;27.2.12479018"
+
+      - name: Build native library
+        env:
+          ANDROID_ABI: ${{ matrix.abi }}
+          ANDROID_API: "21"
+          ANDROID_NDK_HOME: ${{ env.ANDROID_HOME }}/ndk/27.2.12479018
+        run: |
+          mkdir -p "build/ci/${ANDROID_ABI}"
+          bash android/build-native.sh "build/ci/${ANDROID_ABI}/libspinor.so"
+
+      - name: Inspect output
+        env:
+          ANDROID_ABI: ${{ matrix.abi }}
+          ANDROID_NDK_HOME: ${{ env.ANDROID_HOME }}/ndk/27.2.12479018
+        run: |
+          toolchain=$(find "$ANDROID_NDK_HOME/toolchains/llvm/prebuilt" -mindepth 1 -maxdepth 1 -type d | head -n 1)
+          "$toolchain/bin/llvm-readelf" -h "build/ci/${ANDROID_ABI}/libspinor.so"
+          "$toolchain/bin/llvm-readelf" -Ws "build/ci/${ANDROID_ABI}/libspinor.so" | grep -E 'ANativeActivity_onCreate|android_main'
