@@ -1,0 +1,226 @@
+module Spinor.Types
+
+-- Design sketch for the semantic core.  This file is intentionally ahead of
+-- the first native implementation and does not claim current Idriç execution.
+-- The first C slice below it mirrors only AxialSpinState and its invariants.
+
+public export
+Number : Type
+Number = Double
+
+public export
+record ScreenPoint where
+  constructor PointOnScreen
+  x : Number
+  y : Number
+
+public export
+record Vec3 where
+  constructor V3
+  x : Number
+  y : Number
+  z : Number
+
+public export
+record Quaternion where
+  constructor Q
+  x : Number
+  y : Number
+  z : Number
+  w : Number
+
+-- Conceptual unit types.  The executable C boundary checks/normalizes rather
+-- than pretending IEEE-754 equality can prove unit length.
+public export
+record UnitVec3 where
+  constructor UnitAxis
+  vector : Vec3
+
+public export
+record Spin3 where
+  constructor Lift
+  quaternion : Quaternion
+
+-- SO(3) is deliberately not represented by the same type as Spin(3).
+-- q and −q project to the same SO(3) orientation but are different lifts.
+public export
+record SO3 where
+  constructor Orientation
+  matrix : Vect 9 Number
+
+public export
+project : Spin3 → SO3
+
+-- First executable interaction slice.  physicalAngle is unwrapped and signed.
+-- A 2π change returns the projected SO(3) orientation but negates the lift.
+-- A 4π change returns the lift itself.
+public export
+record AxialSpinState where
+  constructor AxialSpin
+  axis : UnitVec3
+  physicalAngle : Number
+
+public export
+liftAxial : AxialSpinState → Spin3
+
+public export
+orientationAxial : AxialSpinState → SO3
+orientationAxial state = project (liftAxial state)
+
+public export
+data TurnCheckpoint
+  = InitialIdentity
+  | OrientationReturned2π
+  | LiftReturned4π
+  | BetweenCheckpoints
+
+-- Raw Android pointer details stop at the platform adapter.  The semantic core
+-- only receives a signed rotation increment.
+public export
+data SpinCommand
+  = BeginBodyGrab
+  | TurnBodyBy Number
+  | EndBodyGrab
+  | CancelBodyGrab
+  | ResetSpin
+
+public export
+stepAxial : AxialSpinState → SpinCommand → AxialSpinState
+
+-- A deforming belt is not just the rigid body's SO(3) orientation.  The
+-- visible field carries a continuous lift from the fixed exterior to the body.
+-- Keeping this distinct prevents a future renderer from reconstructing a field
+-- from the final SO(3) orientation and accidentally erasing the 2π/4π state.
+public export
+record FieldSample where
+  constructor SampleField
+  parameter : Number
+  frame : Spin3
+
+public export
+record DeformationField where
+  constructor SampledField
+  samples : List FieldSample
+
+public export
+record BodyAttachment where
+  constructor OnBody
+  localPosition : Vec3
+  localNormal : UnitVec3
+
+public export
+record WorldAnchor where
+  constructor FixedAnchor
+  worldPosition : Vec3
+  worldNormal : UnitVec3
+
+public export
+record Ribbon where
+  constructor ConnectRibbon
+  bodyEnd : BodyAttachment
+  worldEnd : WorldAnchor
+  width : Number
+  thickness : Number
+
+public export
+record BeltSystem where
+  constructor Belts
+  ribbons : List Ribbon
+  field : DeformationField
+
+-- The renderer consumes geometry sampled from the semantic field.  Rendering,
+-- Android lifecycle, ANativeWindow/EGL/Sokol/GLES and pointer IDs are not part
+-- of these types.
+public export
+record RibbonVertex where
+  constructor RibbonPoint
+  position : Vec3
+  normal : UnitVec3
+  u : Number
+  v : Number
+
+public export
+record RibbonMesh where
+  constructor MeshRibbons
+  vertices : List RibbonVertex
+  triangles : List (Nat, Nat, Nat)
+
+public export
+sampleBelts : AxialSpinState → BeltSystem → RibbonMesh
+
+-- Later free-orientation interaction cannot safely collapse history to a final
+-- SO(3) pose.  A path/lift continuation is an explicit value.
+public export
+record LiftedStep where
+  constructor ContinueLift
+  delta : Spin3
+  resultingLift : Spin3
+
+public export
+record FreeSpinState where
+  constructor FreeSpin
+  bodyLift : Spin3
+  continuation : List LiftedStep
+
+-- Seifert surfaces are a later geometry family, not part of the first six-belt
+-- ABI.  They belong here because the boundary/orientation relation is semantic,
+-- while tessellation and shading belong below the sampling boundary.
+public export
+record ClosedCurve where
+  constructor Curve
+  points : List Vec3
+
+public export
+record Link where
+  constructor BoundaryLink
+  components : List ClosedCurve
+
+public export
+data SurfaceOrientation
+  = PositiveOrientation
+  | NegativeOrientation
+
+public export
+record SurfaceMesh where
+  constructor OrientedSurfaceMesh
+  vertices : List Vec3
+  triangles : List (Nat, Nat, Nat)
+  orientation : SurfaceOrientation
+
+public export
+record SeifertSurface where
+  constructor SurfaceFor
+  boundary : Link
+  mesh : SurfaceMesh
+  -- Future executable type should carry/check that ∂mesh = boundary and that
+  -- the surface is orientable.  Do not encode those as unchecked Bool fields.
+
+-- Full app state keeps mathematics, direct manipulation and camera separate.
+public export
+data GrabTarget
+  = NoGrab
+  | GrabBody
+  | GrabRibbon Nat
+  | OrbitCamera
+
+public export
+record InteractionState where
+  constructor Interaction
+  target : GrabTarget
+  start : ScreenPoint
+  current : ScreenPoint
+
+public export
+record CameraState where
+  constructor Camera
+  eye : Vec3
+  lookAt : Vec3
+  up : UnitVec3
+
+public export
+record SpinorModel where
+  constructor Model
+  spin : AxialSpinState
+  belts : BeltSystem
+  interaction : InteractionState
+  camera : CameraState
