@@ -10,8 +10,8 @@ extern "C" {
 /*
  * First executable slice of the Idriç type sketch.
  *
- * This is application/domain C, not Android glue.  It is deliberately safe to
- * host-test.  The Android NativeActivity adapter should translate touch into
+ * This is application/domain C, not Android glue. It is deliberately safe to
+ * host-test. The Android NativeActivity adapter should translate touch into
  * signed turn increments and call this API.
  */
 
@@ -35,7 +35,9 @@ typedef struct {
 
 typedef enum {
     SPINOR_OK = 0,
-    SPINOR_INVALID_ARGUMENT = 1
+    SPINOR_INVALID_ARGUMENT = 1,
+    SPINOR_BUFFER_TOO_SMALL = 2,
+    SPINOR_LIMIT = 3
 } SpinorStatus;
 
 typedef enum {
@@ -53,8 +55,8 @@ SpinorQuatf spinor_state_lift(const SpinorAxialState *state);
 void spinor_state_orientation3x3(const SpinorAxialState *state, float out_matrix[9]);
 
 /*
- * Classify exact pedagogical milestones modulo 4π with caller-selected angular
- * tolerance.  4π is checked before 0 because physical_angle is unwrapped.
+ * Classify pedagogical milestones modulo 4π with caller-selected angular
+ * tolerance. 4π is checked before 0 because physical_angle is unwrapped.
  */
 SpinorCheckpoint spinor_state_checkpoint(
     const SpinorAxialState *state,
