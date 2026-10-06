@@ -97,7 +97,7 @@ That lets us later swap Three.js/WebGL for another renderer, including a Sokol p
 Record these without putting them in the first slice:
 
 - replace narrow ribbons with general deforming surfaces;
-- experiment with the “surfer surfaces” / richer-surface idea from the originating discussion;
+- extend the interaction from ribbons to Seifert surfaces with explicit boundary links and orientation;
 - arbitrary number of connection points;
 - connection points placed on different bodies or on a continuous boundary;
 - movable outer anchors;
