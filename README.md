@@ -8,6 +8,8 @@ The implementation starts from the semantic boundary rather than the renderer:
 
 - [types/Spinor.idric](types/Spinor.idric) — Idriç type sketch for Spin(3), SO(3), lifted interaction state, ribbons, and later Seifert surfaces;
 - [native/spinor_core.h](native/spinor_core.h) — first small C ABI mirrored from that sketch;
+- [native/spinor_field.h](native/spinor_field.h) — analytic Spin(3) ambient contraction with rigid core and fixed exterior;
+- [native/spinor_ribbons.h](native/spinor_ribbons.h) — six-ribbon geometry sampler over that field;
 - [notes/idric-ndk-boundary.md](notes/idric-ndk-boundary.md) — why the Android/NDK boundary is shaped this way;
 - [android/README.md](android/README.md) — NativeActivity lane and ownership boundary.
 
