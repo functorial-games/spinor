@@ -35,16 +35,18 @@ jobs:
         env:
           ANDROID_ABI: ${{ matrix.abi }}
           ANDROID_API: "21"
-          ANDROID_NDK_HOME: ${{ env.ANDROID_HOME }}/ndk/27.2.12479018
         run: |
+          sdk_root="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-/usr/local/lib/android/sdk}}"
+          export ANDROID_NDK_HOME="$sdk_root/ndk/27.2.12479018"
           mkdir -p "build/ci/${ANDROID_ABI}"
           bash android/build-native.sh "build/ci/${ANDROID_ABI}/libspinor.so"
 
       - name: Inspect output
         env:
           ANDROID_ABI: ${{ matrix.abi }}
-          ANDROID_NDK_HOME: ${{ env.ANDROID_HOME }}/ndk/27.2.12479018
         run: |
+          sdk_root="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-/usr/local/lib/android/sdk}}"
+          ANDROID_NDK_HOME="$sdk_root/ndk/27.2.12479018"
           toolchain=$(find "$ANDROID_NDK_HOME/toolchains/llvm/prebuilt" -mindepth 1 -maxdepth 1 -type d | head -n 1)
           "$toolchain/bin/llvm-readelf" -h "build/ci/${ANDROID_ABI}/libspinor.so"
           "$toolchain/bin/llvm-readelf" -Ws "build/ci/${ANDROID_ABI}/libspinor.so" | grep -E 'ANativeActivity_onCreate|android_main'
