@@ -4,7 +4,14 @@ Interactive spinor and belt-trick playground.
 
 The first concrete goal is direct manipulation: grab the central body or a ribbon control and move it, while the attached field/ribbons deform continuously enough to make the difference between a 2π turn and a 4π turn physically obvious.
 
-This repository begins with research rather than a renderer. The reference notes separate three things that are easy to blur together:
+The implementation starts from the semantic boundary rather than the renderer:
+
+- [types/Spinor.idric](types/Spinor.idric) — Idriç type sketch for Spin(3), SO(3), lifted interaction state, ribbons, and later Seifert surfaces;
+- [native/spinor_core.h](native/spinor_core.h) — first small C ABI mirrored from that sketch;
+- [notes/idric-ndk-boundary.md](notes/idric-ndk-boundary.md) — why the Android/NDK boundary is shaped this way;
+- [android/README.md](android/README.md) — NativeActivity lane and ownership boundary.
+
+The reference notes separate three things that are easy to blur together:
 
 - Jason Hise's original Maya/C++ animation pipeline and his later browser experiments;
 - independent implementations that expose useful mathematics or rendering techniques;
@@ -16,4 +23,4 @@ See:
 - [notes/related-implementations.md](notes/related-implementations.md)
 - [notes/interaction.md](notes/interaction.md)
 
-The intended home of this repository is the `functorial-games` organization.
+Repository home: `functorial-games/spinor`.
