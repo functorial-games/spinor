@@ -25,9 +25,11 @@ jobs:
 
       - name: Install pinned NDK
         run: |
-          command -v sdkmanager
-          yes | sdkmanager --licenses >/dev/null || true
-          sdkmanager "ndk;27.2.12479018"
+          sdk_root="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-/usr/local/lib/android/sdk}}"
+          sdkmanager=$(find "$sdk_root/cmdline-tools" -type f -name sdkmanager | sort -V | tail -n 1)
+          test -x "$sdkmanager"
+          yes | "$sdkmanager" --licenses >/dev/null || true
+          "$sdkmanager" "ndk;27.2.12479018"
 
       - name: Build native library
         env:
