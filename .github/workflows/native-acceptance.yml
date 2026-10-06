@@ -23,10 +23,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: android-actions/setup-android@v3
-
       - name: Install pinned NDK
-        run: sdkmanager "ndk;27.2.12479018"
+        run: |
+          command -v sdkmanager
+          yes | sdkmanager --licenses >/dev/null || true
+          sdkmanager "ndk;27.2.12479018"
 
       - name: Build native library
         env:
