@@ -4,7 +4,8 @@ import Data.Vect
 
 -- Design sketch for the semantic core.  This file is intentionally ahead of
 -- the first native implementation and does not claim current Idriç execution.
--- The first C slice below it mirrors only AxialSpinState and its invariants.
+-- The executable C slices mirror AxialSpinState plus the first analytic
+-- deformation field and six-ribbon sampler; later types remain design-only.
 
 public export
 Number : Type
@@ -99,10 +100,25 @@ record FieldSample where
   parameter : Number
   frame : Spin3
 
+-- First executable field: one rigid core sphere, one fixed exterior sphere,
+-- and a continuous Spin(3) contraction in the shell between them.
 public export
-record DeformationField where
-  constructor SampledField
-  samples : List FieldSample
+record AxialContractionField where
+  constructor ContractAxially
+  coreRadius : Number
+  anchorRadius : Number
+  auxiliaryAxis : UnitVec3
+
+public export
+fieldLiftAt : AxialSpinState → AxialContractionField → Vec3 → Spin3
+
+public export
+deformPoint : AxialSpinState → AxialContractionField → Vec3 → Vec3
+
+public export
+data DeformationField
+  = AnalyticAxial AxialContractionField
+  | SampledField (List FieldSample)
 
 public export
 record BodyAttachment where
