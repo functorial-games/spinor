@@ -1,0 +1,45 @@
+name: Publish Spinor prerelease
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/publish-prerelease.yml
+
+permissions:
+  actions: read
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download tested APK artifacts
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -eux
+          mkdir -p dist/a1 dist/c67
+          gh run download 37534213403 \
+            --repo "$GITHUB_REPOSITORY" \
+            --name spinor-miro-a1-armeabi-v7a \
+            --dir dist/a1
+          gh run download 37534213403 \
+            --repo "$GITHUB_REPOSITORY" \
+            --name spinor-miro-c67-arm64-v8a \
+            --dir dist/c67
+          find dist -type f -maxdepth 3 -print
+
+      - name: Create public prerelease
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -eux
+          gh release create v0.0.1-pre.1 \
+            dist/a1/*.apk \
+            dist/c67/*.apk \
+            --repo "$GITHUB_REPOSITORY" \
+            --target 4aff4167643c09a39f754fedc1d56cb3b0317afa \
+            --title "Spinor v0.0.1-pre.1" \
+            --prerelease \
+            --notes "Very early Spinor prerelease. Tested on MIRO A1 and MIRO C67. Current interaction: one-direction spin; pinch zoom is not implemented yet. Includes signed MIRO A1 (armeabi-v7a) and MIRO C67 (arm64-v8a) APKs."
