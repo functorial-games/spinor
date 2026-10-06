@@ -33,6 +33,14 @@ jobs:
           ref: ${{ env.KITCHEN_COMMIT }}
           path: deps/kitchen
 
+      - name: Provision movie tools
+        run: |
+          set -eux
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg
+          ffmpeg -version | sed -n '1p'
+          ffprobe -version | sed -n '1p'
+
       - name: Render numbered stills
         run: |
           set -eux
@@ -69,6 +77,12 @@ jobs:
             printf 'fps\t%s\n' "$SPINOR_MOVIE_FPS"
             printf 'width\t%s\n' "$SPINOR_MOVIE_WIDTH"
             printf 'height\t%s\n' "$SPINOR_MOVIE_HEIGHT"
+            printf 'ffmpeg_version\t%s\n' "$(
+              ffmpeg -version | sed -n '1s/^ffmpeg version //p'
+            )"
+            printf 'ffprobe_version\t%s\n' "$(
+              ffprobe -version | sed -n '1s/^ffprobe version //p'
+            )"
             printf 'movie_sha256\t%s\n' "$(
               sha256sum build/movie/spinor-4pi-demo.mp4 |
               cut -d ' ' -f 1
