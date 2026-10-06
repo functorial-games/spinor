@@ -60,6 +60,48 @@ for required in "$clang" "$readelf" "$strip" "$glue_source"; do
 done
 
 mkdir -p "$(dirname -- "$output")"
+work=$(mktemp -d "${RUNNER_TEMP:-${TMPDIR:-/tmp}}/spinor-native.XXXXXX")
+trap 'rm -rf "$work"' EXIT
+
+common_compile=(
+    -std=c11
+    -O2
+    -fPIC
+    -I "$glue_dir"
+    -I "$root/native"
+    -I "$root/android"
+)
+
+strict_compile=(
+    "${common_compile[@]}"
+    -Wall
+    -Wextra
+    -Werror
+    -Wpedantic
+)
+
+sources=(
+    "$root/android/spinor_android.c"
+    "$root/android/spinor_renderer.c"
+    "$root/native/spinor_core.c"
+    "$root/native/spinor_field.c"
+    "$root/native/spinor_ribbons.c"
+)
+
+objects=()
+for source in "${sources[@]}"; do
+    base=$(basename -- "$source" .c)
+    object="$work/$base.o"
+    "$clang" "${strict_compile[@]}" -c "$source" -o "$object"
+    objects+=("$object")
+done
+
+# android_native_app_glue is vendored by the NDK. Keep our sources fail-closed
+# under strict warnings without promoting upstream format-pedantic warnings to
+# application defects.
+glue_object="$work/android_native_app_glue.o"
+"$clang"     "${common_compile[@]}"     -Wall     -Wextra     -Wno-format-pedantic     -c "$glue_source"     -o "$glue_object"
+objects+=("$glue_object")
 
 link_alignment=()
 case "$abi" in
@@ -71,7 +113,7 @@ case "$abi" in
         ;;
 esac
 
-"$clang"     -std=c11     -O2     -fPIC     -shared     -Wall     -Wextra     -Werror     -Wpedantic     -I "$glue_dir"     -I "$root/native"     -I "$root/android"     "$root/android/spinor_android.c"     "$root/android/spinor_renderer.c"     "$root/native/spinor_core.c"     "$root/native/spinor_field.c"     "$root/native/spinor_ribbons.c"     "$glue_source"     -Wl,--no-undefined     -Wl,-soname,libspinor.so     "${link_alignment[@]}"     -landroid     -llog     -lEGL     -lGLESv2     -lm     -o "$output"
+"$clang"     -shared     "${objects[@]}"     -Wl,--no-undefined     -Wl,-soname,libspinor.so     "${link_alignment[@]}"     -landroid     -llog     -lEGL     -lGLESv2     -lm     -o "$output"
 
 "$strip" --strip-unneeded "$output"
 
