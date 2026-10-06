@@ -91,13 +91,37 @@ static uint16_t draw_indices[SPINOR_RENDER_INDEX_COUNT];
 static SpinorRenderVertex ribbon_vertices[SPINOR_RENDER_VERTEX_COUNT];
 static SpinorRenderVertex cube_vertices[SPINOR_CUBE_TRIANGLE_VERTEX_COUNT];
 
-static const GLfloat RIBBON_COLORS[SPINOR_RIBBON_COUNT][3] = {
-    {0.92f, 0.26f, 0.22f},
-    {0.66f, 0.12f, 0.12f},
-    {0.30f, 0.86f, 0.38f},
-    {0.10f, 0.58f, 0.18f},
-    {0.26f, 0.48f, 0.98f},
-    {0.12f, 0.24f, 0.72f}
+/*
+ * Each ribbon gets two related edge colors. GLES interpolates them across the
+ * strip, so the ribbon reads as a band instead of a flat line without adding
+ * normals or a lighting model. Edge 0 is slightly brighter/more saturated;
+ * edge 1 is darker and a little quieter.
+ */
+static const GLfloat RIBBON_EDGE_COLORS[SPINOR_RIBBON_COUNT][2][3] = {
+    {
+        {1.00f, 0.25f, 0.18f},
+        {0.70f, 0.13f, 0.12f}
+    },
+    {
+        {0.84f, 0.11f, 0.09f},
+        {0.46f, 0.06f, 0.07f}
+    },
+    {
+        {0.24f, 0.98f, 0.34f},
+        {0.13f, 0.62f, 0.25f}
+    },
+    {
+        {0.09f, 0.76f, 0.18f},
+        {0.05f, 0.39f, 0.13f}
+    },
+    {
+        {0.20f, 0.48f, 1.00f},
+        {0.12f, 0.28f, 0.72f}
+    },
+    {
+        {0.12f, 0.30f, 0.90f},
+        {0.07f, 0.14f, 0.50f}
+    }
 };
 
 static GLuint compile_shader(GLenum type, const char *source)
@@ -179,7 +203,7 @@ static int ensure_model(void)
     }
 
     ribbon_spec.body_half_extent = 1.0f;
-    ribbon_spec.width = 0.28f;
+    ribbon_spec.width = 0.36f;
     ribbon_spec.segments = SPINOR_RENDER_SEGMENTS;
 
     model_ready = true;
@@ -239,10 +263,11 @@ static int rebuild_ribbons(void)
 
     for (uint32_t vertex = 0u; vertex < mesh.vertex_count; ++vertex) {
         const uint32_t ribbon = vertex / vertices_per_ribbon;
+        const uint32_t side = vertex & 1u;
         set_vertex(
             &ribbon_vertices[vertex],
             sampled_positions[vertex],
-            RIBBON_COLORS[ribbon]
+            RIBBON_EDGE_COLORS[ribbon][side]
         );
     }
 
