@@ -1,5 +1,7 @@
 module Spinor.Types
 
+import Data.Vect
+
 -- Design sketch for the semantic core.  This file is intentionally ahead of
 -- the first native implementation and does not claim current Idriç execution.
 -- The first C slice below it mirrors only AxialSpinState and its invariants.
