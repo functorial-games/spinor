@@ -2,7 +2,11 @@
 #include <android/input.h>
 #include <android/log.h>
 #include <android/native_window.h>
+
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wstrict-prototypes"
 #include <android_native_app_glue.h>
+#pragma clang diagnostic pop
 
 #include <math.h>
 #include <stdbool.h>
@@ -424,7 +428,6 @@ static int32_t handle_input(
 
 void android_main(struct android_app *app)
 {
-    app_dummy();
     SPINOR_LOG("native entry");
 
     SpinorAndroidState state;
