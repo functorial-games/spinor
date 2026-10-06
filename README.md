@@ -26,3 +26,12 @@ See:
 - [notes/interaction.md](notes/interaction.md)
 
 Repository home: `functorial-games/spinor`.
+
+## Repeatable movie
+
+The public 0 → 2π → 4π demo is generated from the same semantic Spin(3)
+state, contraction field, and six-ribbon sampler used by the Android build.
+The repository writes numbered PPM stills and an exact trajectory receipt;
+Kitchen performs only the canonical stills → H.264/MP4 assembly.
+
+See [movie/README.md](movie/README.md).

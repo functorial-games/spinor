@@ -1,0 +1,106 @@
+name: Render Spinor movie
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "movie/**"
+      - "native/**"
+      - ".github/workflows/spinor-movie.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  movie:
+    runs-on: ubuntu-latest
+    env:
+      KITCHEN_COMMIT: 0554249d6b807760a42de3ae0493c844c015e7aa
+      SPINOR_MOVIE_FRAMES: "240"
+      SPINOR_MOVIE_WIDTH: "480"
+      SPINOR_MOVIE_HEIGHT: "480"
+      SPINOR_MOVIE_FPS: "30"
+
+    steps:
+      - name: Checkout Spinor
+        uses: actions/checkout@v4
+
+      - name: Checkout pinned Kitchen
+        uses: actions/checkout@v4
+        with:
+          repository: isomorphisms/kitchen
+          ref: ${{ env.KITCHEN_COMMIT }}
+          path: deps/kitchen
+
+      - name: Render numbered stills
+        run: |
+          set -eux
+          sh movie/render-frames.sh build/movie/frames
+
+      - name: Assemble canonical MP4
+        run: |
+          set -eux
+          sh deps/kitchen/tasks/movie-from-stills/build.sh \
+            'build/movie/frames/frame-%06d.ppm' \
+            "$SPINOR_MOVIE_FPS" \
+            build/movie/spinor-4pi-demo.mp4
+
+      - name: Verify movie and write receipt
+        run: |
+          set -eux
+          test -s build/movie/spinor-4pi-demo.mp4
+          actual_frames=$(
+            ffprobe \
+              -v error \
+              -select_streams v:0 \
+              -count_frames \
+              -show_entries stream=nb_read_frames \
+              -of default=nokey=1:noprint_wrappers=1 \
+              build/movie/spinor-4pi-demo.mp4
+          )
+          test "$actual_frames" = "$SPINOR_MOVIE_FRAMES"
+
+          {
+            printf 'field\tvalue\n'
+            printf 'spinor_commit\t%s\n' "$GITHUB_SHA"
+            printf 'kitchen_commit\t%s\n' "$KITCHEN_COMMIT"
+            printf 'frame_count\t%s\n' "$SPINOR_MOVIE_FRAMES"
+            printf 'fps\t%s\n' "$SPINOR_MOVIE_FPS"
+            printf 'width\t%s\n' "$SPINOR_MOVIE_WIDTH"
+            printf 'height\t%s\n' "$SPINOR_MOVIE_HEIGHT"
+            printf 'movie_sha256\t%s\n' "$(
+              sha256sum build/movie/spinor-4pi-demo.mp4 |
+              cut -d ' ' -f 1
+            )"
+            printf 'trajectory_sha256\t%s\n' "$(
+              sha256sum build/movie/frames/trajectory.tsv |
+              cut -d ' ' -f 1
+            )"
+            printf 'frame_checksums_sha256\t%s\n' "$(
+              sha256sum build/movie/frames/frames.sha256 |
+              cut -d ' ' -f 1
+            )"
+          } > build/movie/spinor-4pi-demo.receipt.tsv
+
+      - name: Upload workflow evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: spinor-4pi-demo
+          if-no-files-found: error
+          path: |
+            build/movie/spinor-4pi-demo.mp4
+            build/movie/spinor-4pi-demo.receipt.tsv
+            build/movie/frames/trajectory.tsv
+            build/movie/frames/frames.sha256
+
+      - name: Publish prerelease movie assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -eux
+          gh release upload v0.0.1-pre.1 \
+            build/movie/spinor-4pi-demo.mp4 \
+            build/movie/spinor-4pi-demo.receipt.tsv \
+            'build/movie/frames/trajectory.tsv#spinor-4pi-demo-trajectory.tsv' \
+            --clobber
