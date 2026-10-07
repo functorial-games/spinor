@@ -2,6 +2,12 @@
 
 Research pass: 2026-10-06.
 
+## Credit statement
+
+Spinor should be understood as part of the visual and pedagogical lineage of Jason Hise's spin-½, belt-trick, antitwister, and higher-dimensional geometry work. In particular, the use of a central object with multiple attached ribbons/fibers to make the distinction between 2π and 4π visible owes a clear debt to Hise's animations. The goal of this repository is to make that visual idea directly manipulable on modern hardware while keeping the mathematics and provenance inspectable.
+
+Nothing in this repository should imply that we originated Hise's visual construction, or that our independently written implementation is Hise's original code. When Spinor is shown publicly, Hise should be credited by name and linked to his own work.
+
 Jason Hise is the person behind the belt-trick / antitwister / 4D animations we had discussed earlier.
 
 ## Original Wikipedia-era workflow
