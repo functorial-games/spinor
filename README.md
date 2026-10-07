@@ -12,6 +12,7 @@ Primary Hise references:
 
 - [Jason Hise, “Why I create beautiful math GIFs” — Wikimedia Diff](https://diff.wikimedia.org/2016/09/22/math-gifs/)
 - [JasonHise on Wikimedia Commons](https://commons.wikimedia.org/wiki/User:JasonHise)
+- [Jason Hise on YouTube](https://www.youtube.com/channel/UCw5aOpkU7_uuL73-kVxdJIA)
 - [Entropy Games](https://entropygames.net/)
 - [Twist Gallery / antitwister work](https://entropygames.net/twist_gallery.html)
 - [Detailed Hise research and provenance notes for this repository](notes/jason-hise.md)
