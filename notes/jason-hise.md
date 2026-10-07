@@ -21,6 +21,8 @@ Primary source:
   https://en.wikipedia.org/wiki/User:JasonHise
 - Entropy Games:
   https://entropygames.net/
+- YouTube channel:
+  https://www.youtube.com/channel/UCw5aOpkU7_uuL73-kVxdJIA
 
 Hise says his usual production pipeline was:
 
