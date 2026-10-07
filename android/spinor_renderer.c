@@ -203,7 +203,7 @@ static int ensure_model(void)
     }
 
     ribbon_spec.body_half_extent = 1.0f;
-    ribbon_spec.width = 0.36f;
+    ribbon_spec.width = 0.44f;
     ribbon_spec.segments = SPINOR_RENDER_SEGMENTS;
 
     model_ready = true;
