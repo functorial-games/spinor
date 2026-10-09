@@ -3,15 +3,13 @@ name: Spinor APK artifacts
 on:
   push:
     branches: [main]
-    paths:
-      - "android/**"
-      - "native/**"
-      - ".github/workflows/apk-artifacts.yml"
+  pull_request:
   workflow_dispatch:
 
 jobs:
   apk:
     runs-on: ubuntu-latest
+    timeout-minutes: 90
     strategy:
       fail-fast: false
       matrix:
@@ -23,18 +21,24 @@ jobs:
 
     steps:
       - name: Checkout Spinor
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - id: host-ick
+        uses: ./.github/actions/ick-host
 
       - name: Checkout canonical Android NDK substrate
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
           repository: isomorphisms/android-NDK
+          ref: 42f04d7654d54309ec3f8787bfd2bc40730399d7
           path: deps/android-NDK
 
       - name: Checkout public development signer
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
           repository: isomorphismes/wegert
+          ref: dfa3751f0282cdf6a2083c97063b0e8e996d0d92
           path: deps/wegert
 
       - name: Install Android inputs
@@ -48,6 +52,13 @@ jobs:
             "platforms;android-34" \
             "build-tools;35.0.0"
 
+      - name: Build the selected ICK frontend
+        id: ick
+        uses: isomorphisms/ai-ci/ick-android@903b2cb27ea572c9c6cb2ffa9f39e0fbf06ec9f8
+        with:
+          abi: ${{ matrix.abi }}
+          ndk: ${{ env.ANDROID_HOME }}/ndk/27.2.12479018
+
       - name: Verify public development signer
         run: |
           bash deps/wegert/_/build/android-signing/verify-test-signing.sh
@@ -56,6 +67,7 @@ jobs:
         env:
           ANDROID_ABI: ${{ matrix.abi }}
           ANDROID_API: "21"
+          ICK_CC: ${{ steps.ick.outputs.compiler }}
           ANDROID_NDK_CHECKOUT: ${{ github.workspace }}/deps/android-NDK
           ANDROID_BUILD_TOOLS: ${{ env.ANDROID_HOME }}/build-tools/35.0.0
           SPINOR_KEYSTORE: ${{ github.workspace }}/deps/wegert/_/build/app/wegert-debug.keystore
@@ -77,7 +89,7 @@ jobs:
           sha256sum "$output" > "$output.sha256"
 
       - name: Upload signed APK
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: spinor-${{ matrix.device }}-${{ matrix.abi }}
           if-no-files-found: error

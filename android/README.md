@@ -50,6 +50,10 @@ paired A1/C67 orchestration belongs in Flexible Pipes.
 
 Build one native library:
 
+Set `ICK_ROOT` to the qualified installed stage for that ABI, or `ICK_CC`
+to its compiler driver. See the [producer record](../notes/division-migration.md)
+for the exact shared compiler pin and the ICK/NDK boundary.
+
 ```sh
 ANDROID_ABI=armeabi-v7a \
 ANDROID_NDK_HOME=/absolute/android-ndk-r27c \

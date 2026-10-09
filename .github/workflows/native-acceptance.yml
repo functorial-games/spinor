@@ -8,12 +8,20 @@ jobs:
   host-semantic:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - id: ick
+        uses: ./.github/actions/ick-host
       - name: Host semantic acceptance
+        env:
+          ICK: ${{ steps.ick.outputs.compiler }}
         run: sh native/test-host.sh
 
   android-native:
+    needs: host-semantic
     runs-on: ubuntu-latest
+    timeout-minutes: 90
     strategy:
       fail-fast: false
       matrix:
@@ -21,7 +29,9 @@ jobs:
           - armeabi-v7a
           - arm64-v8a
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
 
       - name: Install pinned NDK
         run: |
@@ -31,10 +41,18 @@ jobs:
           yes | "$sdkmanager" --licenses >/dev/null || true
           "$sdkmanager" "ndk;27.2.12479018"
 
+      - name: Build the selected ICK frontend
+        id: ick
+        uses: isomorphisms/ai-ci/ick-android@903b2cb27ea572c9c6cb2ffa9f39e0fbf06ec9f8
+        with:
+          abi: ${{ matrix.abi }}
+          ndk: ${{ env.ANDROID_HOME }}/ndk/27.2.12479018
+
       - name: Build native library
         env:
           ANDROID_ABI: ${{ matrix.abi }}
           ANDROID_API: "21"
+          ICK_CC: ${{ steps.ick.outputs.compiler }}
         run: |
           sdk_root="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-/usr/local/lib/android/sdk}}"
           export ANDROID_NDK_HOME="$sdk_root/ndk/27.2.12479018"

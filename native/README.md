@@ -53,6 +53,10 @@ rotations.
 
 ## Host acceptance
 
+Set `ICK` to the qualified native compiler described in
+[`notes/division-migration.md`](../notes/division-migration.md). The maintained
+test route requires it and uses the common native Makefile.
+
 Run:
 
 ```sh

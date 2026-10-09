@@ -36,18 +36,7 @@ rm -f "$output_directory"/frame-*.ppm
 rm -f "$output_directory"/trajectory.tsv
 rm -f "$output_directory"/frames.sha256
 
-"${CC:-cc}" \
-    -std=c11 \
-    -O2 \
-    -Wall \
-    -Wextra \
-    -Werror \
-    "$here/render_frames.c" \
-    "$root/native/spinor_core.c" \
-    "$root/native/spinor_field.c" \
-    "$root/native/spinor_ribbons.c" \
-    -lm \
-    -o "$renderer"
+make -f "$root/native/Makefile" movie MOVIE="$renderer"
 
 "$renderer" \
     "$output_directory" \

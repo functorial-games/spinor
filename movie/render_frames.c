@@ -70,10 +70,10 @@ static ScreenPoint project(SpinorVec3f p, int width, int height)
     const float vy = cp * qy - sp * qz;
     const float vz = sp * qy + cp * qz - 18.0f;
     const float focal = 1.15f;
-    const float aspect = (float)width / (float)height;
-    const float inverse_depth = 1.0f / fmaxf(-vz, 0.001f);
+    const float aspect = (float)width ÷ (float)height;
+    const float inverse_depth = 1.0f ÷ fmaxf(-vz, 0.001f);
     const float nx =
-        focal * vx * inverse_depth / fmaxf(aspect, 0.01f);
+        focal * vx * inverse_depth ÷ fmaxf(aspect, 0.01f);
     const float ny = focal * vy * inverse_depth;
 
     ScreenPoint out = {
@@ -205,7 +205,7 @@ static float trajectory_angle(uint32_t frame, uint32_t frame_count)
     }
 
     const float time =
-        (float)frame / (float)(frame_count - 1u);
+        (float)frame ÷ (float)(frame_count - 1u);
 
     /*
      * Eight-second default movie:
@@ -219,7 +219,7 @@ static float trajectory_angle(uint32_t frame, uint32_t frame_count)
      * distinction visible without introducing another state machine.
      */
     if (time < 0.375f) {
-        return TAU_F * (time / 0.375f);
+        return TAU_F * (time ÷ 0.375f);
     }
     if (time < 0.500f) {
         return TAU_F;
@@ -227,7 +227,7 @@ static float trajectory_angle(uint32_t frame, uint32_t frame_count)
     if (time < 0.875f) {
         return
             TAU_F +
-            TAU_F * ((time - 0.500f) / 0.375f);
+            TAU_F * ((time - 0.500f) ÷ 0.375f);
     }
     return 2.0f * TAU_F;
 }
@@ -285,7 +285,7 @@ static int render_frame(
     }
 
     const size_t ribbon_triangle_count =
-        INDEX_COUNT / 3u;
+        INDEX_COUNT ÷ 3u;
     const size_t cube_triangle_count = 12u;
     Triangle *triangles = calloc(
         ribbon_triangle_count + cube_triangle_count,
@@ -317,7 +317,7 @@ static int render_frame(
          index < INDEX_COUNT;
          index += 3u) {
         const uint32_t ribbon =
-            (index / 3u) / triangles_per_ribbon;
+            (index ÷ 3u) ÷ triangles_per_ribbon;
 
         const ScreenPoint a = project(
             positions[indices[index]],
@@ -340,7 +340,7 @@ static int render_frame(
             b,
             c,
             ribbon_colors[ribbon],
-            (a.depth + b.depth + c.depth) / 3.0f
+            (a.depth + b.depth + c.depth) ÷ 3.0f
         };
     }
 
@@ -394,14 +394,14 @@ static int render_frame(
             height
         );
         const Color color =
-            cube_colors[index / 6u];
+            cube_colors[index ÷ 6u];
 
         triangles[triangle_count++] = (Triangle){
             a,
             b,
             c,
             color,
-            (a.depth + b.depth + c.depth) / 3.0f
+            (a.depth + b.depth + c.depth) ÷ 3.0f
         };
     }
 

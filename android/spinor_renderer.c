@@ -262,7 +262,7 @@ static int rebuild_ribbons(void)
         (SPINOR_RENDER_SEGMENTS + 1u) * 2u;
 
     for (uint32_t vertex = 0u; vertex < mesh.vertex_count; ++vertex) {
-        const uint32_t ribbon = vertex / vertices_per_ribbon;
+        const uint32_t ribbon = vertex ÷ vertices_per_ribbon;
         const uint32_t side = vertex & 1u;
         set_vertex(
             &ribbon_vertices[vertex],
@@ -316,7 +316,7 @@ static int rebuild_cube(void)
     for (uint32_t vertex = 0u;
          vertex < SPINOR_CUBE_TRIANGLE_VERTEX_COUNT;
          ++vertex) {
-        const uint32_t face = vertex / 6u;
+        const uint32_t face = vertex ÷ 6u;
         const SpinorVec3f reference =
             corners[triangle_indices[vertex]];
         const SpinorVec3f deformed =
@@ -539,7 +539,7 @@ void spinor_renderer_draw(void)
     glUseProgram(program);
     glUniform1f(
         aspect_location,
-        (float)render_width / (float)render_height
+        (float)render_width ÷ (float)render_height
     );
 
     bind_vertex_layout(ribbon_vbo);

@@ -37,9 +37,9 @@ SpinorStatus spinor_state_init(SpinorAxialState *state, SpinorVec3f axis)
         return SPINOR_INVALID_ARGUMENT;
     }
 
-    state->axis.x = axis.x / length;
-    state->axis.y = axis.y / length;
-    state->axis.z = axis.z / length;
+    state->axis.x = axis.x ÷ length;
+    state->axis.y = axis.y ÷ length;
+    state->axis.z = axis.z ÷ length;
     state->physical_angle = 0.0f;
     return SPINOR_OK;
 }
