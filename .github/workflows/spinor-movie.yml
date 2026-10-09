@@ -3,10 +3,7 @@ name: Render Spinor movie
 on:
   push:
     branches: [main]
-    paths:
-      - "movie/**"
-      - "native/**"
-      - ".github/workflows/spinor-movie.yml"
+  pull_request:
   workflow_dispatch:
 
 permissions:
@@ -24,10 +21,14 @@ jobs:
 
     steps:
       - name: Checkout Spinor
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - id: ick
+        uses: ./.github/actions/ick-host
 
       - name: Checkout pinned Kitchen
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
           repository: isomorphisms/kitchen
           ref: ${{ env.KITCHEN_COMMIT }}
@@ -42,6 +43,8 @@ jobs:
           ffprobe -version | sed -n '1p'
 
       - name: Render numbered stills
+        env:
+          ICK: ${{ steps.ick.outputs.compiler }}
         run: |
           set -eux
           sh movie/render-frames.sh build/movie/frames
@@ -98,7 +101,7 @@ jobs:
           } > build/movie/spinor-4pi-demo.receipt.tsv
 
       - name: Upload workflow evidence
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: spinor-4pi-demo
           if-no-files-found: error
@@ -109,6 +112,7 @@ jobs:
             build/movie/frames/frames.sha256
 
       - name: Publish prerelease movie assets
+        if: github.event_name != 'pull_request'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |

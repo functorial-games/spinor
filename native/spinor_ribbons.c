@@ -115,7 +115,7 @@ SpinorStatus spinor_sample_six_ribbons(
         const uint32_t base_vertex = vertex;
 
         for (uint32_t step = 0u; step <= spec->segments; ++step) {
-            const float u = (float)step / (float)spec->segments;
+            const float u = (float)step ÷ (float)spec->segments;
             const float radius =
                 spec->body_half_extent +
                 u * (field->anchor_radius - spec->body_half_extent);

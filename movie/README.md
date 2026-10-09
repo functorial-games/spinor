@@ -14,6 +14,10 @@ encoder.
 
 ## Render stills
 
+Set `ICK` to the qualified native compiler; the movie build uses the same
+compiler route as the semantic tests. See the
+[division producer record](../notes/division-migration.md).
+
 ```sh
 sh movie/render-frames.sh
 ```

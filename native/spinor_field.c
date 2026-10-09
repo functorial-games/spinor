@@ -61,10 +61,10 @@ static SpinorQuatf normalize_quaternion(SpinorQuatf value)
     }
 
     SpinorQuatf result = {
-        value.x / length,
-        value.y / length,
-        value.z / length,
-        value.w / length
+        value.x ÷ length,
+        value.y ÷ length,
+        value.z ÷ length,
+        value.w ÷ length
     };
     return result;
 }
@@ -101,7 +101,7 @@ SpinorStatus spinor_field_init(
 
     field->core_radius = core_radius;
     field->anchor_radius = anchor_radius;
-    field->auxiliary_axis = scale3(perpendicular, 1.0f / length);
+    field->auxiliary_axis = scale3(perpendicular, 1.0f ÷ length);
     return SPINOR_OK;
 }
 
@@ -124,7 +124,7 @@ float spinor_field_core_weight(const SpinorField *field, float radius)
      * where rigid core/fixed exterior meet the deforming shell.
      */
     const float t =
-        (radius - field->core_radius) /
+        (radius - field->core_radius) ÷
         (field->anchor_radius - field->core_radius);
     const float smooth = t * t * (3.0f - 2.0f * t);
     return 1.0f - smooth;
